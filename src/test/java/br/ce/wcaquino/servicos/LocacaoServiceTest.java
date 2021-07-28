@@ -9,6 +9,7 @@ import static org.hamcrest.CoreMatchers.not;
 import java.util.Date;
 
 import br.ce.wcaquino.exceptions.FilmesSemEstoqueException;
+import br.ce.wcaquino.exceptions.LocadoraException;
 import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -52,5 +53,31 @@ public class LocacaoServiceTest {
 
         // Ação
         locacaoService.alugarFilme(usuario, filme);
+    }
+
+    @Test
+    public void testLocacao_usuarioVazio() throws FilmesSemEstoqueException {
+        // Cenário
+        LocacaoService service = new LocacaoService();
+        Filme filme = new Filme("Filme 2", 1, 4.0);
+
+        // Ação
+        try {
+            service.alugarFilme(null, filme);
+            Assert.fail();
+        } catch (LocadoraException e) {
+            MatcherAssert.assertThat(e.getMessage(), is("Usuario vazio"));
+        }
+    }
+
+    @Test
+    public void testLocacao_filmeVazio() {
+        // Cenário
+        LocacaoService locacaoService = new LocacaoService();
+        Usuario usuario = new Usuario("Otavio");
+
+        // Ação
+        Exception exception = Assert.assertThrows(LocadoraException.class, () -> locacaoService.alugarFilme(usuario, null));
+        MatcherAssert.assertThat(exception.getMessage(),is("Filme vazio"));
     }
 }
