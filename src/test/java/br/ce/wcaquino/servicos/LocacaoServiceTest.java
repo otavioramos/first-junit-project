@@ -6,7 +6,9 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
@@ -39,10 +41,11 @@ public class LocacaoServiceTest {
         // Cenario
         Usuario usuario = new Usuario("Otavio");
         Filme filme = new Filme("Velozes e Furiosos", 2, 27.99);
+        List<Filme> filmes = Arrays.asList(filme);
         
         // Acao
         Locacao locacao;
-        locacao = service.alugarFilme(usuario, filme);
+        locacao = service.alugarFilme(usuario, filmes);
 
         // Verificacao
         error.checkThat(locacao.getValor(), is(equalTo(27.99)));
@@ -56,19 +59,21 @@ public class LocacaoServiceTest {
         // Cenario
         Usuario usuario = new Usuario("Otavio");
         Filme filme = new Filme("Velozes e Furiosos", 0, 27.99);
-
+        List<Filme> filmes = Arrays.asList(filme);
+        
         // Acao
-        service.alugarFilme(usuario, filme);
+        service.alugarFilme(usuario, filmes);
     }
 
     @Test
     public void testLocacao_usuarioVazio() throws FilmesSemEstoqueException {
         // Cenario
         Filme filme = new Filme("Filme 2", 1, 4.0);
-
+        List<Filme> filmes = Arrays.asList(filme);
+        
         // Acao
         try {
-            service.alugarFilme(null, filme);
+            service.alugarFilme(null, filmes);
             Assert.fail();
         } catch (LocadoraException e) {
             MatcherAssert.assertThat(e.getMessage(), is("Usuario vazio"));
@@ -82,6 +87,6 @@ public class LocacaoServiceTest {
 
         // Acao
         Exception exception = Assert.assertThrows(LocadoraException.class, () -> service.alugarFilme(usuario, null));
-        MatcherAssert.assertThat(exception.getMessage(),is("Filme vazio"));
+        MatcherAssert.assertThat(exception.getMessage(),is("Lista de filmes vazia ou nula"));
     }
 }
