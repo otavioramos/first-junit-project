@@ -23,14 +23,28 @@ public class LocacaoService {
 			throw new LocadoraException("Lista de filmes vazia ou nula");
 		}
 		Locacao locacao = new Locacao();
-		Double precoTotal = 0.00;
+		double precoTotal = 0.00;
 		
-		for (Filme filme : filmes) {
+		for (int i = 0; i < filmes.size(); i++) {
+			Filme filme = filmes.get(i);
 			if (filme.getEstoque() == 0) {
 				throw new FilmesSemEstoqueException("Filme sem estoque");
 			}
+			Double valorFilme = filme.getPrecoLocacao();
+			if (i == 2) {
+				valorFilme = valorFilme * 0.75;
+			}
+			if (i == 3) {
+				valorFilme = valorFilme * 0.5;
+			}
+			if (i == 4) {
+				valorFilme = valorFilme * 0.25;
+			}
+			if (i == 5) {
+				valorFilme = valorFilme * 0;
+			}
 			locacao.addFilme(filme);
-			precoTotal = precoTotal + filme.getPrecoLocacao();
+			precoTotal = precoTotal + valorFilme;
 		}
 
 		locacao.setUsuario(usuario);
