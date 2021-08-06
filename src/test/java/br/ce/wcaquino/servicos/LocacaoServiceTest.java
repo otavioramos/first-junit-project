@@ -5,6 +5,7 @@ import br.ce.wcaquino.entidades.Locacao;
 import br.ce.wcaquino.entidades.Usuario;
 import br.ce.wcaquino.exceptions.FilmesSemEstoqueException;
 import br.ce.wcaquino.exceptions.LocadoraException;
+import br.ce.wcaquino.matchers.DiaSemanaMatcher;
 import br.ce.wcaquino.utils.DataUtils;
 import org.hamcrest.MatcherAssert;
 import org.junit.*;
@@ -12,6 +13,8 @@ import org.junit.rules.ErrorCollector;
 
 import java.util.*;
 
+import static br.ce.wcaquino.matchers.MatchersProprios.caiEm;
+import static br.ce.wcaquino.matchers.MatchersProprios.caiNumaSegunda;
 import static br.ce.wcaquino.utils.DataUtils.*;
 import static org.hamcrest.CoreMatchers.*;
 
@@ -95,7 +98,6 @@ public class LocacaoServiceTest {
         Locacao locacao = service.alugarFilme(usuario,filmes);
 
         // Verificacao
-        boolean ehSegunda = DataUtils.verificarDiaSemana(locacao.getDataRetorno(), Calendar.MONDAY);
-        Assert.assertTrue(ehSegunda);
+        MatcherAssert.assertThat(locacao.getDataRetorno(), caiNumaSegunda());
     }
 }
