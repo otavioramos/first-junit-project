@@ -1,6 +1,7 @@
 package br.ce.wcaquino.entidades;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -39,7 +40,7 @@ public class Locacao {
 	public List<Filme> getFilmes() {
 		return filmes;
 	}
-	public void addFilme(Filme filme) {
-		this.filmes.add(filme);
+	public void addFilme(Filme... filme) {
+		this.filmes.addAll(Arrays.asList(filme));
 	}
 }
