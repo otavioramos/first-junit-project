@@ -29,7 +29,6 @@ import br.ce.wcaquino.entidades.Usuario;
 import br.ce.wcaquino.exceptions.FilmesSemEstoqueException;
 import br.ce.wcaquino.exceptions.LocadoraException;
 import br.ce.wcaquino.utils.DataUtils;
-import buildermaster.BuilderMaster;
 
 public class LocacaoServiceTest {
 
@@ -112,8 +111,4 @@ public class LocacaoServiceTest {
         // Verificacao
         MatcherAssert.assertThat(locacao.getDataRetorno(), caiNumaSegunda());
     }
-    
-    public static void main(String[] args) {
-		new BuilderMaster().gerarCodigoClasse(Locacao.class);
-	}
 }
