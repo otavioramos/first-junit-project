@@ -1,5 +1,8 @@
 package br.ce.wcaquino.servicos;
 
+import static br.ce.wcaquino.builders.FilmeBuilder.umFilme;
+import static br.ce.wcaquino.builders.FilmeBuilder.umFilmeSemEstoque;
+import static br.ce.wcaquino.builders.UsuarioBuilder.umUsuario;
 import static br.ce.wcaquino.matchers.MatchersProprios.caiNumaSegunda;
 import static br.ce.wcaquino.matchers.MatchersProprios.ehHoje;
 import static br.ce.wcaquino.matchers.MatchersProprios.ehHojeComDiferencaDias;
@@ -44,8 +47,8 @@ public class LocacaoServiceTest {
         Assume.assumeFalse(verificarDiaSemana(new Date(),Calendar.SATURDAY));
 
         // Cenario
-        Usuario usuario = new Usuario("Otavio");
-        Filme filme = new Filme("Velozes e Furiosos", 2, 27.99);
+        Usuario usuario = umUsuario().agora();
+        Filme filme = umFilme().comValor(27.99).agora();
         List<Filme> filmes = Collections.singletonList(filme);
 
         // Acao
@@ -61,8 +64,8 @@ public class LocacaoServiceTest {
     @Test(expected = FilmesSemEstoqueException.class)
     public void deveLancarExcecaoAoAlugarFilmeSemEstoque() throws Exception {
         // Cenario
-        Usuario usuario = new Usuario("Otavio");
-        Filme filme = new Filme("Velozes e Furiosos", 0, 27.99);
+        Usuario usuario = umUsuario().agora();
+        Filme filme = umFilmeSemEstoque().agora();
         List<Filme> filmes = Collections.singletonList(filme);
 
         // Acao
@@ -72,7 +75,7 @@ public class LocacaoServiceTest {
     @Test
     public void naoDeveAlugarFilmeSemUsuario() throws FilmesSemEstoqueException {
         // Cenario
-        Filme filme = new Filme("Filme 2", 1, 4.0);
+        Filme filme = umFilme().agora();
         List<Filme> filmes = Collections.singletonList(filme);
 
         // Acao
@@ -87,7 +90,7 @@ public class LocacaoServiceTest {
     @Test
     public void naoDeveAlugarFilmeSemFilme() {
         // Cenario
-        Usuario usuario = new Usuario("Otavio");
+        Usuario usuario = umUsuario().agora();
 
         // Acao
         Exception exception = Assert.assertThrows(LocadoraException.class, () -> service.alugarFilme(usuario, null));
@@ -99,8 +102,8 @@ public class LocacaoServiceTest {
         Assume.assumeTrue(DataUtils.verificarDiaSemana(new Date(),Calendar.SATURDAY));
 
         // Cenario
-        Usuario usuario = new Usuario("Otavio");
-        List<Filme> filmes = Collections.singletonList(new Filme("Filme 1", 1, 5.0));
+        Usuario usuario = umUsuario().agora();
+        List<Filme> filmes = Collections.singletonList(umFilme().agora());
 
         // Acao
         Locacao locacao = service.alugarFilme(usuario,filmes);
