@@ -24,8 +24,7 @@ import static br.ce.wcaquino.utils.DataUtils.obterDataComDiferencaDias;
 import static br.ce.wcaquino.utils.DataUtils.verificarDiaSemana;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class LocacaoServiceTest {
 
@@ -50,7 +49,7 @@ public class LocacaoServiceTest {
 
     @Test
     public void deveAlugarFilme() throws Exception {
-        Assume.assumeFalse(verificarDiaSemana(new Date(),Calendar.SATURDAY));
+        Assume.assumeFalse(verificarDiaSemana(new Date(), Calendar.SATURDAY));
 
         // Cenario
         Usuario usuario = umUsuario().agora();
@@ -105,14 +104,14 @@ public class LocacaoServiceTest {
 
     @Test
     public void deveDevolverNaSegundaAoAlugarNoSabado() throws LocadoraException, FilmesSemEstoqueException {
-        Assume.assumeTrue(DataUtils.verificarDiaSemana(new Date(),Calendar.SATURDAY));
+        Assume.assumeTrue(DataUtils.verificarDiaSemana(new Date(), Calendar.SATURDAY));
 
         // Cenario
         Usuario usuario = umUsuario().agora();
         List<Filme> filmes = Collections.singletonList(umFilme().agora());
 
         // Acao
-        Locacao locacao = service.alugarFilme(usuario,filmes);
+        Locacao locacao = service.alugarFilme(usuario, filmes);
 
         // Verificacao
         MatcherAssert.assertThat(locacao.getDataRetorno(), caiNumaSegunda());
@@ -124,35 +123,41 @@ public class LocacaoServiceTest {
         Usuario usuario = umUsuario().agora();
         List<Filme> filmes = Collections.singletonList(umFilme().agora());
 
-        when(spc.possuiNegativacao(usuario)).thenReturn(true);
+        when(spc.possuiNegativacao(Mockito.any(Usuario.class))).thenReturn(true);
 
         // Acao
         try {
             service.alugarFilme(usuario, filmes);
-        // Verificacao
+            // Verificacao
             Assert.fail();
         } catch (LocadoraException e) {
-            MatcherAssert.assertThat(e.getMessage(),is("Usuario Negativado"));
+            MatcherAssert.assertThat(e.getMessage(), is("Usuario Negativado"));
         }
 
         verify(spc).possuiNegativacao(usuario);
     }
 
     @Test
-    public void deveEnviarEmailParaLocacoesAtrasadas(){
+    public void deveEnviarEmailParaLocacoesAtrasadas() {
         // Cenario
         Usuario usuario = umUsuario().agora();
-        List<Locacao> locacoes = Collections.singletonList(
-                umLocacao()
-                        .comUsuario(usuario)
-                        .comDataRetorno(obterDataComDiferencaDias(-2))
-                        .agora());
+        Usuario usuario2 = umUsuario().comNome("Usuario em dia").agora();
+        Usuario usuario3 = umUsuario().comNome("Outro atrasado").agora();
+        List<Locacao> locacoes = Arrays.asList(
+                umLocacao().atrasada().comUsuario(usuario).agora(),
+                umLocacao().comUsuario(usuario2).agora(),
+                umLocacao().atrasada().comUsuario(usuario3).agora(),
+                umLocacao().atrasada().comUsuario(usuario3).agora());
         when(dao.obterLocacoesPendentes()).thenReturn(locacoes);
 
         // Acao
         service.notificarAtrasos();
 
         // Verificacao
+        verify(email, times(3)).notificarAtraso(Mockito.any(Usuario.class));
         verify(email).notificarAtraso(usuario);
+        verify(email,Mockito.atLeastOnce()).notificarAtraso(usuario3);
+        verify(email, never()).notificarAtraso(usuario2);
+        Mockito.verifyNoMoreInteractions(email);
     }
 }
