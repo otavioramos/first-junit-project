@@ -1,34 +1,29 @@
 package br.ce.wcaquino.servicos;
 
-import static br.ce.wcaquino.builders.FilmeBuilder.umFilme;
-import static br.ce.wcaquino.builders.FilmeBuilder.umFilmeSemEstoque;
-import static br.ce.wcaquino.builders.UsuarioBuilder.umUsuario;
-import static br.ce.wcaquino.matchers.MatchersProprios.caiNumaSegunda;
-import static br.ce.wcaquino.matchers.MatchersProprios.ehHoje;
-import static br.ce.wcaquino.matchers.MatchersProprios.ehHojeComDiferencaDias;
-import static br.ce.wcaquino.utils.DataUtils.verificarDiaSemana;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-
-import org.hamcrest.MatcherAssert;
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ErrorCollector;
-
+import br.ce.wcaquino.daos.LocacaoDAO;
+import br.ce.wcaquino.daos.LocacaoDAOFake;
 import br.ce.wcaquino.entidades.Filme;
 import br.ce.wcaquino.entidades.Locacao;
 import br.ce.wcaquino.entidades.Usuario;
 import br.ce.wcaquino.exceptions.FilmesSemEstoqueException;
 import br.ce.wcaquino.exceptions.LocadoraException;
 import br.ce.wcaquino.utils.DataUtils;
+import org.hamcrest.MatcherAssert;
+import org.junit.*;
+import org.junit.rules.ErrorCollector;
+
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+
+import static br.ce.wcaquino.builders.FilmeBuilder.umFilme;
+import static br.ce.wcaquino.builders.FilmeBuilder.umFilmeSemEstoque;
+import static br.ce.wcaquino.builders.UsuarioBuilder.umUsuario;
+import static br.ce.wcaquino.matchers.MatchersProprios.*;
+import static br.ce.wcaquino.utils.DataUtils.verificarDiaSemana;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 
 public class LocacaoServiceTest {
 
@@ -40,6 +35,8 @@ public class LocacaoServiceTest {
     @Before
     public void setup() {
         service = new LocacaoService();
+        LocacaoDAO dao= new LocacaoDAOFake();
+        service.setLocacaoDAO(dao);
     }
 
     @Test
