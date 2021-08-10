@@ -99,7 +99,7 @@ public class LocacaoServiceTest {
         // Cenario
         Usuario usuario = umUsuario().agora();
 
-        // Acao
+        // Acao e Verificacao
         Exception exception = Assert.assertThrows(LocadoraException.class, () -> service.alugarFilme(usuario, null));
         MatcherAssert.assertThat(exception.getMessage(), is("Lista de filmes vazia ou nula"));
     }
@@ -120,7 +120,7 @@ public class LocacaoServiceTest {
     }
 
     @Test
-    public void naoDeveAlugarFilmeParaNegativadoSPC() throws FilmesSemEstoqueException {
+    public void naoDeveAlugarFilmeParaNegativadoSPC() throws Exception {
         // Cenario
         Usuario usuario = umUsuario().agora();
         List<Filme> filmes = Collections.singletonList(umFilme().agora());
@@ -161,5 +161,18 @@ public class LocacaoServiceTest {
         verify(email,Mockito.atLeastOnce()).notificarAtraso(usuario3);
         verify(email, never()).notificarAtraso(usuario2);
         Mockito.verifyNoMoreInteractions(email);
+    }
+
+    @Test
+    public void deveTratarErroNoSPC() throws Exception {
+        // Cenario
+        Usuario usuario = umUsuario().agora();
+        List<Filme> filmes = Collections.singletonList(umFilme().agora());
+
+        when(spc.possuiNegativacao(usuario)).thenThrow(new Exception("Falha catrastrofica"));
+
+        // Acao e Verificacao
+        Exception ex = Assert.assertThrows(LocadoraException.class,() -> service.alugarFilme(usuario,filmes));
+        MatcherAssert.assertThat(ex.getMessage(),is("Problemas com o SPC, tente novamente"));
     }
 }
