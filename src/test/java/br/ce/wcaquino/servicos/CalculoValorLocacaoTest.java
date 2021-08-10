@@ -11,7 +11,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.mockito.Mockito;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,10 +26,13 @@ import static org.hamcrest.CoreMatchers.is;
 @RunWith(Parameterized.class)
 public class CalculoValorLocacaoTest {
 
+    @InjectMocks
     public LocacaoService service;
 
+    @Mock
     private SPCService spc;
 
+    @Mock
     private LocacaoDAO dao;
 
     @Parameterized.Parameter
@@ -41,11 +46,7 @@ public class CalculoValorLocacaoTest {
 
     @Before
     public void setup() {
-        service = new LocacaoService();
-        dao = Mockito.mock(LocacaoDAO.class);
-        service.setLocacaoDAO(dao);
-        spc = Mockito.mock(SPCService.class);
-        service.setSpcService(spc);
+        MockitoAnnotations.initMocks(this);
     }
 
     private static Filme filme1 = umFilme().agora();
