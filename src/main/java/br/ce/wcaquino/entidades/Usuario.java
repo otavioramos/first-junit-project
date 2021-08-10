@@ -36,10 +36,14 @@ public class Usuario {
 			return false;
 		Usuario other = (Usuario) obj;
 		if (nome == null) {
-			if (other.nome != null)
-				return false;
-		} else if (!nome.equals(other.nome))
-			return false;
-		return true;
+			return other.nome == null;
+		} else return nome.equals(other.nome);
+	}
+
+	@Override
+	public String toString() {
+		return "Usuario{" +
+				"nome='" + nome + '\'' +
+				'}';
 	}
 }
