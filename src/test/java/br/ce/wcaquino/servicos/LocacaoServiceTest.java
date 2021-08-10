@@ -1,7 +1,6 @@
 package br.ce.wcaquino.servicos;
 
 import br.ce.wcaquino.daos.LocacaoDAO;
-import br.ce.wcaquino.daos.LocacaoDAOFake;
 import br.ce.wcaquino.entidades.Filme;
 import br.ce.wcaquino.entidades.Locacao;
 import br.ce.wcaquino.entidades.Usuario;
@@ -11,11 +10,9 @@ import br.ce.wcaquino.utils.DataUtils;
 import org.hamcrest.MatcherAssert;
 import org.junit.*;
 import org.junit.rules.ErrorCollector;
+import org.mockito.Mockito;
 
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static br.ce.wcaquino.builders.FilmeBuilder.umFilme;
 import static br.ce.wcaquino.builders.FilmeBuilder.umFilmeSemEstoque;
@@ -24,10 +21,15 @@ import static br.ce.wcaquino.matchers.MatchersProprios.*;
 import static br.ce.wcaquino.utils.DataUtils.verificarDiaSemana;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
+import static org.mockito.Mockito.when;
 
 public class LocacaoServiceTest {
 
     private LocacaoService service;
+
+    private SPCService spc;
+
+    private LocacaoDAO dao;
 
     @Rule
     public ErrorCollector error = new ErrorCollector();
@@ -35,8 +37,10 @@ public class LocacaoServiceTest {
     @Before
     public void setup() {
         service = new LocacaoService();
-        LocacaoDAO dao= new LocacaoDAOFake();
+        dao = Mockito.mock(LocacaoDAO.class);
         service.setLocacaoDAO(dao);
+        spc = Mockito.mock(SPCService.class);
+        service.setSpcService(spc);
     }
 
     @Test
@@ -107,5 +111,19 @@ public class LocacaoServiceTest {
 
         // Verificacao
         MatcherAssert.assertThat(locacao.getDataRetorno(), caiNumaSegunda());
+    }
+
+    @Test
+    public void naoDeveAlugarFilmeParaNegativadoSPC() {
+        // Cenario
+        Usuario usuario = umUsuario().agora();
+        List<Filme> filmes = Collections.singletonList(umFilme().agora());
+
+        when(spc.possuiNegativacao(usuario)).thenReturn(true);
+
+        // Acao
+        Exception exception = Assert.assertThrows(LocadoraException.class,
+                () -> service.alugarFilme(usuario, filmes));
+        MatcherAssert.assertThat(exception.getMessage(),is("Usuario Negativado"));
     }
 }
