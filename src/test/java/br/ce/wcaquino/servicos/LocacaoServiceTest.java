@@ -7,13 +7,9 @@ import br.ce.wcaquino.entidades.Usuario;
 import br.ce.wcaquino.exceptions.FilmesSemEstoqueException;
 import br.ce.wcaquino.exceptions.LocadoraException;
 import br.ce.wcaquino.utils.DataUtils;
-import org.hamcrest.MatcherAssert;
 import org.junit.*;
 import org.junit.rules.ErrorCollector;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 
 import java.util.*;
 
@@ -25,6 +21,7 @@ import static br.ce.wcaquino.matchers.MatchersProprios.*;
 import static br.ce.wcaquino.utils.DataUtils.verificarDiaSemana;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.*;
 
 public class LocacaoServiceTest {
@@ -90,7 +87,7 @@ public class LocacaoServiceTest {
             service.alugarFilme(null, filmes);
             Assert.fail();
         } catch (LocadoraException e) {
-            MatcherAssert.assertThat(e.getMessage(), is("Usuario vazio"));
+            assertThat(e.getMessage(), is("Usuario vazio"));
         }
     }
 
@@ -101,7 +98,7 @@ public class LocacaoServiceTest {
 
         // Acao e Verificacao
         Exception exception = Assert.assertThrows(LocadoraException.class, () -> service.alugarFilme(usuario, null));
-        MatcherAssert.assertThat(exception.getMessage(), is("Lista de filmes vazia ou nula"));
+        assertThat(exception.getMessage(), is("Lista de filmes vazia ou nula"));
     }
 
     @Test
@@ -116,7 +113,7 @@ public class LocacaoServiceTest {
         Locacao locacao = service.alugarFilme(usuario, filmes);
 
         // Verificacao
-        MatcherAssert.assertThat(locacao.getDataRetorno(), caiNumaSegunda());
+        assertThat(locacao.getDataRetorno(), caiNumaSegunda());
     }
 
     @Test
@@ -133,7 +130,7 @@ public class LocacaoServiceTest {
             // Verificacao
             Assert.fail();
         } catch (LocadoraException e) {
-            MatcherAssert.assertThat(e.getMessage(), is("Usuario Negativado"));
+            assertThat(e.getMessage(), is("Usuario Negativado"));
         }
 
         verify(spc).possuiNegativacao(usuario);
@@ -173,6 +170,24 @@ public class LocacaoServiceTest {
 
         // Acao e Verificacao
         Exception ex = Assert.assertThrows(LocadoraException.class,() -> service.alugarFilme(usuario,filmes));
-        MatcherAssert.assertThat(ex.getMessage(),is("Problemas com o SPC, tente novamente"));
+        assertThat(ex.getMessage(),is("Problemas com o SPC, tente novamente"));
+    }
+
+    @Test
+    public void deveProrrogarUmaLocacao(){
+        // Cenario
+        Locacao locacao = umLocacao().agora();
+
+        // Acao
+        service.prorrogarLocacao(locacao,3);
+
+        // Verificacao
+        ArgumentCaptor<Locacao> argCapt = ArgumentCaptor.forClass(Locacao.class);
+        Mockito.verify(dao).salvar(argCapt.capture());
+        Locacao locacaoRetornada = argCapt.getValue();
+
+        error.checkThat(locacaoRetornada.getValor(), is(12.0));
+        error.checkThat(locacaoRetornada.getDataLocacao(), ehHoje());
+        error.checkThat(locacaoRetornada.getDataRetorno(), ehHojeComDiferencaDias(3));
     }
 }

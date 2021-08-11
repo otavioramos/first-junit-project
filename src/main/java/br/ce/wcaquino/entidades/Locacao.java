@@ -43,4 +43,7 @@ public class Locacao {
 	public void addFilme(Filme... filme) {
 		this.filmes.addAll(Arrays.asList(filme));
 	}
+	public void setFilmes(List<Filme> filmes) {
+		this.filmes = filmes;
+	}
 }
