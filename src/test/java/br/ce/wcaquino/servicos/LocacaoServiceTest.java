@@ -7,6 +7,7 @@ import br.ce.wcaquino.entidades.Usuario;
 import br.ce.wcaquino.exceptions.FilmesSemEstoqueException;
 import br.ce.wcaquino.exceptions.LocadoraException;
 import br.ce.wcaquino.utils.DataUtils;
+import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -55,6 +56,7 @@ public class LocacaoServiceTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        service = PowerMockito.spy(service);
     }
 
     @Test
@@ -218,5 +220,21 @@ public class LocacaoServiceTest {
         error.checkThat(locacaoRetornada.getValor(), is(12.0));
         error.checkThat(locacaoRetornada.getDataLocacao(), ehHoje());
         error.checkThat(locacaoRetornada.getDataRetorno(), ehHojeComDiferencaDias(3));
+    }
+
+    @Test
+    public void deveAlugarFilmeSemCalcularValor() throws Exception {
+        // Cenario
+        Usuario usuario = umUsuario().agora();
+        List<Filme> filmes = Collections.singletonList(umFilme().agora());
+
+        PowerMockito.doReturn(1.0).when(service,"calcularValorLocacao",filmes);
+
+        // Acao
+        Locacao locacao = service.alugarFilme(usuario, filmes);
+
+        // Verificacao
+        MatcherAssert.assertThat(locacao.getValor(),is(1.0));
+        PowerMockito.verifyPrivate(service).invoke("calcularValorLocacao",filmes);
     }
 }

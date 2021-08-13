@@ -29,6 +29,11 @@ public class LocacaoService {
 		if (filmes == null || filmes.isEmpty()) {
 			throw new LocadoraException("Lista de filmes vazia ou nula");
 		}
+		for (Filme filme : filmes) {
+			if (filme.getEstoque() == 0) {
+				throw new FilmesSemEstoqueException("Filme sem estoque");
+			}
+		}
 
 		boolean negativado;
 		try {
@@ -42,27 +47,11 @@ public class LocacaoService {
 		}
 
 		Locacao locacao = new Locacao();
-		double precoTotal = 0.00;
-		
-		for (int i = 0; i < filmes.size(); i++) {
-			Filme filme = filmes.get(i);
-			if (filme.getEstoque() == 0) {
-				throw new FilmesSemEstoqueException("Filme sem estoque");
-			}
-			Double valorFilme = filme.getPrecoLocacao();
-			switch (i) {
-				case 2: valorFilme = valorFilme * 0.75; break;
-				case 3: valorFilme = valorFilme * 0.5; break;
-				case 4: valorFilme = valorFilme * 0.25; break;
-				case 5: valorFilme = valorFilme * 0; break;
-			}
-			locacao.addFilme(filme);
-			precoTotal = precoTotal + valorFilme;
-		}
 
 		locacao.setUsuario(usuario);
+		locacao.setFilmes(filmes);
 		locacao.setDataLocacao(Calendar.getInstance().getTime());
-		locacao.setValor(precoTotal);
+		locacao.setValor(calcularValorLocacao(filmes));
 
 		//Entrega no dia seguinte
 		Date dataEntrega = Calendar.getInstance().getTime();
@@ -76,6 +65,23 @@ public class LocacaoService {
 		dao.salvar(locacao);
 		
 		return locacao;
+	}
+
+	private Double calcularValorLocacao(List<Filme> filmes) {
+		double precoTotal = 0.00;
+
+		for (int i = 0; i < filmes.size(); i++) {
+			Filme filme = filmes.get(i);
+			Double valorFilme = filme.getPrecoLocacao();
+			switch (i) {
+				case 2: valorFilme = valorFilme * 0.75; break;
+				case 3: valorFilme = valorFilme * 0.5; break;
+				case 4: valorFilme = valorFilme * 0.25; break;
+				case 5: valorFilme = valorFilme * 0; break;
+			}
+			precoTotal = precoTotal + valorFilme;
+		}
+		return precoTotal;
 	}
 
 	public void notificarAtrasos(){
